@@ -18,8 +18,8 @@ Welcome to my professional financial portfolio. This repository serves as a live
 ### 3. Data Visualization & Business Intelligence (`/03-PowerBI-and-Dashboards`)
 * **Interactive Financial Dashboards:** Custom-built Power BI and Tableau dashboards visualizing complex financial metrics, portfolio risk boundaries, and operational KPIs for high-level decision making.
 
-### 4. Forensic Market Research & Investment Notes (`/04-Market-Analysis-Notes`)
-* **HNI / NRI Portfolio Solutions:** Real-world execution profiles applying advanced **Bucket Strategy** frameworks, structural Systematic Withdrawal Plans (SWP) for retirement, and cross-border taxation structures.
+### 4. Forensic Market Analysis and Notes (`/04-Market-Analysis-Notes`)
+* **Real World News:** Real-world news analysis and different points of view supported by proper backend analysis.
 * **Technical Analysis & Price Action Deep-Dives:** Structured, institutional-grade PDF investment notes evaluating market index positions, sector rotations, and momentum trends using macro indicators.
 
 ---
