@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MARKET WIRE — Live Financial News &amp; Reference</title>
+<style>
+  :root{
+    --ink:#050505;
+    --panel:#141414;
+    --panel-2:#1C1C1C;
+    --hairline:#3A3A3A;
+    --gold:#FFFFFF;
+    --gold-dim:#BBBBBB;
+    --teal:#D6D6D6;
+    --rose:#B0B0B0;
+    --slate:#8A8A8A;
+    --olive:#666666;
+    --up:#FFFFFF;
+    --down:#8A8A8A;
+    --text:#F2F2F2;
+    --muted:#B3B3B3;
+    --muted-2:#7A7A7A;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--ink);
+    color:var(--text);
+    font-family:'Calibri','Carlito','Segoe UI',Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  ::selection{background:var(--gold);color:var(--ink);}
+
+  a{color:inherit;}
+
+  /* ---------- MASTHEAD ---------- */
+  .masthead{
+    display:flex; align-items:baseline; justify-content:space-between;
+    padding:22px clamp(16px,4vw,40px) 16px;
+    border-bottom:1px solid var(--hairline);
+    flex-wrap:wrap; gap:10px;
+  }
+  .wordmark{
+    font-family:'Calibri','Carlito','Segoe UI',Arial,sans-serif;
+    font-weight:700;
+    font-size:clamp(24px,3vw,32px);
+    letter-spacing:0.5px;
+    color:var(--text);
+  }
+  .wordmark span{color:var(--gold);}
+  .masthead-sub{
+    font-family:'Calibri','Carlito','Segoe UI',Arial,sans-serif;
+    font-size:11px;
+    color:var(--muted-2);
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    margin-top:4px;
+  }
+  .clock-block{
+    text-align:right;
+    font-family:'Calibri','Carlito','Segoe UI',Arial,sans-serif;
+  }
+  .clock-time{font-size:20px; color:var(--gold); font-weight:600;}
+  .clock-date{font-size:11px; color:var(--muted-2); letter-spacing:1px; text-transform:uppercase;}
+
+  /* ---------- TICKER TAPE ---------- */
+  .ticker-wrap{
+    background:var(--panel-2);
+    border-bottom:1px solid var(--hairline);
+    overflow:hidden;
+    white-space:nowrap;
+    position:relative;
+    height:38px;
+  }
+  .ticker-wrap::before, .ticker-wrap::after{
+    content:"";
+    position:absolute; top:0; bottom:0; width:40px; z-index:2;
+  }
+  .ticker-wrap::before{left:0; background:linear-gradient(90deg, var(--panel-2), transparent);}
+  .ticker-wrap::after{right:0; background:linear-gradient(270deg, var(--panel-2), transparent);}
+  .ticker-track{
+    display:inline-flex;
+    align-items:center;
+    height:38px;
+    animation:scrollTicker 90s linear infinite;
+    will-change:transform;
+  }
+  .ticker-track.paused{animation-play-state:paused;}
+  @keyframes scrollTicker{
+    0%{transform:translateX(0);}
+    100%{transform:translateX(-50%);}
+  }
+  .ticker-item{
+    font-family:'Calibri','Carlito','Segoe UI',Arial,sans-serif;
+    font-size:12.5px;
+    color:var(--text);
+    padding:0 28px 0 0;
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+  }
+  .ticker-item .dot{color:var(--gold); font-size:10px;}
+  .ticker-item .src-tag{color:var(--muted-2); font-size:10.5px;}
+
+  /* ---------- INDEX STRIP ---------- */
+  .index-strip{
+    display:flex; align-items:center; gap:22px; flex-wrap:wrap;
+    padding:10px clamp(16px,4vw,40px);
+    background:var(--panel);
+    border-bottom:1px solid var(--hairline);
+    font-family:'Calibri','Carlito','Segoe UI',Arial,sans-serif;
+  }
+  .index-item{display:inline-flex; align-items:baseline; gap:8px; font-size:13px;}
+  .index-item .idx-name{color:var(--muted); font-size:10.5px; letter-spacing:1px; text-transform:uppercase;}
+  .index-item .idx-val{color:var(--text); font-weight:600;}
+  .index-item .idx-val.up{color:var(--up);}
+  .index-item .idx-val.down{color:var(--down);}
+  .index-updated{margin-left:auto; font-size:10px; color:var(--muted-2); letter-spacing:0.5px;}
+
+  /* ---------- KEYWORD ALERTS ---------- */
+  .card.alert-hit{
+    border-left-color:#E0B84C !important;
+    background:linear-gradient(90deg, rgba(224,184,76,0.10), transparent 60%);
+  }
+  .alert-badge{
+    display:inline-flex; align-items:center; gap:4px;
+    font-size:10px; letter-spacing:0.5px; text-transform:uppercase;
+    color:#E0B84C; border:1px solid #E0B84C; border-radius:2px;
+    padding:1px 6px;
+  }
+
+  /* ---------- SENTIMENT TAGS ---------- */
+  .sentiment-badge{
+    font-size:9.5px; letter-spacing:0.6px; text-transform:uppercase;
+    border-radius:2px; padding:1px 6px; font-weight:600;
+  }
+  .sentiment-badge.bullish{color:var(--up); border:1px solid var(--up);}
+  .sentiment-badge.bearish{color:var(--down); border:1px solid var(--down);}
+  .sentiment-badge.neutral{color:var(--muted-2); border:1px solid var(--muted-2);}
+
+  /* ---------- CONTROL BAR ---------- */
+  .control-bar{
+    display:flex; flex-wrap:wrap; gap:10px; align-items:center;
+    padding:16px clamp(16px,4vw,40px);
+    border-bottom:1px solid var(--hairline);
+  }
+  .search-input{
+    flex:1 1 220px;
+    background:var(--panel);
+    border:1px solid var(--hairline);
+    color:var(--text);
+    font-family:'Calibri','Carlito','Segoe UI',Arial,sans-serif;
+    font-size:13.5px;
+    padding:9px 12px;
+    border-radius:2px;
+    outline:none;
+  }
+  .search-input:focus{border-color:var(--gold-dim);}
+  .search-input::placeholder{color:var(--muted-2);}
+
+  .chip{
+    font-family:'Calibri','Carlito','Segoe UI',Arial,sans-serif;
+    font-size:11.5px;
+    letter-spacing:0.4px;
+    padding:7px 12px;
+    border:1px solid var(--hairline);
+    border-radius:2px;
+    background:transparent;
+    color:var(--muted);
+    cursor:pointer;
+    display:inline-flex; align-items:center; gap:6px;
+    transition:border-color .15s, color .15s;
+  }
+  .chip:hover{color:var(--text); border-color:var(--muted-2);}
+  .chip.active{color:var(--ink); background:var(--chip-color,var(--gold)); border-color:var(--chip-color,var(--gold)); font-weight:600;}
+  .chip .status-dot{width:6px; height:6px; border-radius:50%; background:var(--muted-2);}
+  .chip .status-dot.ok{background:var(--up);}
+  .chip .status-dot.err{background:var(--down);}
+
+  .refresh-btn{
+    font-family:'Calibri','Carlito','Segoe UI',Arial,sans-serif;
+    font-size:11.5px;
+    background:var(--gold);
+    color:var(--ink);
+    border:none;
+    padding:9px 14px;
+    border-radius:2px;
+    cursor:pointer;
+    font-weight:600;
+    letter-spacing:0.4px;
+    white-space:nowrap;
+  }
+  .refresh-btn:hover{background:#DDDDDD;}
+  .refresh-btn:disabled{opacity:0.5; cursor:default;}
+
+  .auto-note{
+    font-family:'Calibri','Carlito','Segoe UI',Arial,sans-serif;
+    font-size:10.5px;
+    color:var(--muted-2);
+    white-space:nowrap;
+  }
+
+  /* ---------- MAIN LAYOUT ---------- */
+  .layout{
+    display:grid;
+    grid-template-columns:2fr 1fr;
+    gap:1px;
+    background:var(--hairline);
+  }
+  @media (max-width:880px){
+    .layout{grid-template-columns:1fr;}
+  }
+  .col{background:var(--ink); padding:20px clamp(14px,3vw,28px);}
+
+  .section-label{
+    font-family:'Calibri','Carlito','Segoe UI',Arial,sans-serif;
+    font-size:11px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:var(--gold);
+    margin:0 0 14px;
+    padding-bottom:8px;
+    border-bottom:1px solid var(--hairline);
+    display:flex; justify-content:space-between; align-items:baseline;
+  }
+  .section-label .count{color:var(--muted-2); font-size:10px; letter-spacing:1px;}
+
+  /* news cards */
+  .feed{display:flex; flex-direction:column; gap:14px;}
+  .card{
+    background:var(--panel);
+    border:1px solid var(--hairline);
+    border-left:3px solid var(--card-color,var(--gold));
+    padding:14px 16px;
+    border-radius:2px;
+    text-decoration:none;
+    display:block;
+    transition:background .15s;
+  }
+  .card:hover{background:var(--panel-2);}
+  .card-meta{
+    display:flex; flex-wrap:wrap; gap:6px 10px; align-items:center; margin-bottom:6px;
+    font-family:'Calibri','Carlito','Segoe UI',Arial,sans-serif; font-size:10.5px;
+    color:var(--card-color,var(--gold));
+    letter-spacing:0.5px; text-transform:uppercase;
+  }
+  .card-meta .time{color:var(--muted-2); text-transform:none; letter-spacing:0;}
+  .card-meta .timestamp{color:var(--muted-2); text-transform:none; letter-spacing:0; font-variant-numeric:tabular-nums;}
+  .card-title{
+    font-family:'Calibri','Carlito','Segoe UI',Arial,sans-serif;
+    font-size:16px;
+    font-weight:600;
+    line-height:1.35;
+    color:var(--text);
+    margin:0 0 6px;
+  }
+  .card-desc{
+    font-size:12.5px;
+    color:var(--muted);
+    line-height:1.5;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+  .empty-state, .loading-state{
+    font-family:'Calibri','Carlito','Segoe UI',Arial,sans-serif;
+    font-size:12.5px;
+    color:var(--muted-2);
+    padding:30px 10px;
+    text-align:center;
+    border:1px dashed var(--hairline);
+  }
+
+  /* glossary */
+  details.term{
+    border-bottom:1px solid var(--hairline);
+    padding:10px 0;
+  }
+  details.term summary{
+    cursor:pointer;
+    font-family:'Calibri','Carlito','Segoe UI',Arial,sans-serif;
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--text);
+    list-style:none;
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  details.term summary::-webkit-details-marker{display:none;}
+  details.term summary::after{
+    content:"+";
+    color:var(--gold);
+    font-size:16px;
+  }
+  details.term[open] summary::after{content:"–";}
+  details.term p{
+    font-size:12.5px;
+    color:var(--muted);
+    line-height:1.55;
+    margin:8px 0 2px;
+  }
+
+  /* broker pulse */
+  .pulse-note{
+    font-size:12px;
+    color:var(--muted);
+    line-height:1.6;
+    background:var(--panel);
+    border:1px solid var(--hairline);
+    border-left:3px solid var(--rose);
+    padding:12px 14px;
+    margin-bottom:14px;
+    border-radius:2px;
+  }
+  .pulse-note b{color:var(--rose);}
+  .link-list{display:flex; flex-direction:column; gap:8px;}
+  .link-list a{
+    font-family:'Calibri','Carlito','Segoe UI',Arial,sans-serif;
+    font-size:12px;
+    color:var(--text);
+    background:var(--panel);
+    border:1px solid var(--hairline);
+    padding:10px 12px;
+    border-radius:2px;
+    text-decoration:none;
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .link-list a:hover{border-color:var(--muted-2);}
+  .link-list a .arrow{color:var(--gold);}
+
+  footer{
+    text-align:center;
+    font-family:'Calibri','Carlito','Segoe UI',Arial,sans-serif;
+    font-size:10.5px;
+    color:var(--muted-2);
+    padding:24px;
+    border-top:1px solid var(--hairline);
+  }
+</style>
+</head>
+<body>
+
+  <div class="masthead">
+    <div>
+      <div class="wordmark">MARKET<span>WIRE</span></div>
+      <div class="masthead-sub">Live financial news &amp; quick reference</div>
+    </div>
+    <div class="clock-block">
+      <div class="clock-time" id="clockTime">--:--:--</div>
+      <div class="clock-date" id="clockDate">IST</div>
+    </div>
+  </div>
+
+  <div class="ticker-wrap">
+    <div class="ticker-track" id="tickerTrack">
+      <span class="ticker-item"><span class="dot">●</span> Loading wire…</span>
+    </div>
+  </div>
+
+  <div class="index-strip" id="indexStrip">
+    <span class="index-item" id="idx-NSEI"><span class="idx-name">NIFTY 50</span><span class="idx-val">···</span></span>
+    <span class="index-item" id="idx-BSESN"><span class="idx-name">SENSEX</span><span class="idx-val">···</span></span>
+    <span class="index-item" id="idx-NSEBANK"><span class="idx-name">BANK NIFTY</span><span class="idx-val">···</span></span>
+    <span class="index-updated" id="indexUpdated"></span>
+  </div>
+
+  <div class="control-bar">
+    <input type="text" class="search-input" id="searchInput" placeholder="Search headlines… (e.g. RBI, Nifty, IPO, results)">
+    <div id="sourceChips" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+    <button class="refresh-btn" id="refreshBtn">↻ Refresh</button>
+    <span class="auto-note" id="autoNote">next auto-refresh in 5:00</span>
+  </div>
+
+  <div class="control-bar" style="border-top:none; padding-top:0;">
+    <input type="text" class="search-input" id="alertInput" placeholder="Keyword alerts, comma-separated (e.g. Reliance, RBI, IPO) — matches get highlighted &amp; pinned to top" style="flex:1 1 320px;">
+    <span class="auto-note" id="alertStatus">no alerts set</span>
+  </div>
+
+  <div class="control-bar" style="border-top:none; padding-top:0;">
+    <input type="text" class="search-input" id="apiKeyInput" placeholder="Optional: paste ONLY the key string from your rss2json.com dashboard — not a URL" style="flex:1 1 320px;">
+    <button class="refresh-btn" id="applyKeyBtn" style="background:transparent; color:var(--text); border:1px solid var(--hairline);">Apply Key</button>
+    <button class="refresh-btn" id="clearKeyBtn" style="background:transparent; color:var(--muted); border:1px solid var(--hairline);">Clear Key</button>
+    <span class="auto-note" id="keyStatus">no key applied — running on rss2json's free tier</span>
+  </div>
+
+  <div class="layout">
+    <div class="col">
+      <div class="section-label">Feed <span class="count" id="feedCount"></span></div>
+      <div class="feed" id="feed">
+        <div class="loading-state">Pulling headlines from the wire…</div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="section-label">Broker &amp; Exchange Pulse</div>
+      <div class="pulse-note">
+        <b>Note on Dhan:</b> Dhan doesn't expose an open, unauthenticated news feed — the speed you see there is inside their app itself. Their public DhanHQ API covers orders and market data, not editorial news, so it can't be pulled into a static page like this one. What's below is a direct line to Dhan and the primary exchanges/regulator instead of a fake "live" feed.
+      </div>
+      <div class="link-list">
+        <a href="https://dhan.co" target="_blank" rel="noopener">Open Dhan <span class="arrow">↗</span></a>
+        <a href="https://dhan.co/blog/" target="_blank" rel="noopener">Dhan Insights Blog <span class="arrow">↗</span></a>
+        <a href="https://www.nseindia.com/companies-listing/corporate-filings-announcements" target="_blank" rel="noopener">NSE Announcements <span class="arrow">↗</span></a>
+        <a href="https://www.bseindia.com/corporates/ann.html" target="_blank" rel="noopener">BSE Announcements <span class="arrow">↗</span></a>
+        <a href="https://www.sebi.gov.in/sebiweb/home/HomeAction.do?doListing=yes&sid=1&ssid=6&smid=0" target="_blank" rel="noopener">SEBI Press Releases <span class="arrow">↗</span></a>
+        <a href="https://www.rbi.org.in/Scripts/BS_PressReleaseDisplay.aspx" target="_blank" rel="noopener">RBI Press Releases <span class="arrow">↗</span></a>
+      </div>
+
+      <div class="section-label" style="margin-top:26px;">Quick Reference</div>
+      <div id="glossary"></div>
+
+      <div class="section-label" style="margin-top:26px;">Wire Diagnostics</div>
+      <div id="diagnostics" style="font-size:11.5px; color:var(--muted); line-height:1.7;"></div>
+    </div>
+  </div>
+
+  <footer>
+    MARKET WIRE — headlines pulled live via RSS at page load, refreshed every 5 minutes · Built for personal use · Not investment advice
+  </footer>
+
+<script>
+/* ============ CONFIG ============ */
+const SOURCES = [
+  { key:"et",  name:"ET Markets",       color:"var(--gold)",  rss:"https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms" },
+  { key:"mc",  name:"Moneycontrol",     color:"var(--teal)",  rss:"https://www.moneycontrol.com/rss/marketreports.xml" },
+  { key:"lm",  name:"LiveMint",         color:"var(--slate)", rss:"https://www.livemint.com/rss/markets" },
+  { key:"bs",  name:"Business Standard",color:"var(--rose)",  rss:"https://www.business-standard.com/rss/markets-106.rss" },
+  { key:"cnbc",name:"CNBC-TV18",        color:"var(--olive)", rss:"https://www.cnbctv18.com/commonfeeds/v1/cne/rss/market.xml" },
+  { key:"fe",  name:"Financial Express",color:"#C9A227",      rss:"https://www.financialexpress.com/market/feed/" },
+  { key:"bl",  name:"BusinessLine",     color:"#7A9E9F",      rss:"https://www.thehindubusinessline.com/feeder/default.rss" },
+];
+// The two feeds added above (Financial Express, BusinessLine) are real, public RSS endpoints, not
+// placeholders — like the original five, if a publisher ever changes its feed path the two-stage
+// fetch below fails gracefully for just that one source, and Wire Diagnostics shows exactly why.
+const RSS2JSON = "https://api.rss2json.com/v1/api.json?count=100&rss_url=";
+const XML_PROXY = "https://api.allorigins.win/raw?url=";
+const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
+const STAGE_TIMEOUT_MS = 15000;
+
+// PASTE A PERMANENT KEY HERE if you don't want to re-enter it every time you open the file.
+// Get a free one: rss2json.com → Login → Sign up → confirm email → your key is on the dashboard.
+// Example: const RSS2JSON_API_KEY = "abcd1234yourkeyhere";
+const RSS2JSON_API_KEY = "";
+let apiKey = RSS2JSON_API_KEY; // can also be set at runtime via the "Apply Key" box, session-only
+
+const GLOSSARY = [
+  ["P/E Ratio","Price divided by earnings per share. Tells you how many years of current profit it'd take to 'earn back' the share price — a rough shorthand for how expensive a stock is relative to what it makes."],
+  ["FII / DII","Foreign Institutional Investors and Domestic Institutional Investors. Their daily buy/sell numbers (published by NSE/BSE) are watched closely because large net selling by FIIs often drags the index down, regardless of individual stock news."],
+  ["Repo Rate","The rate at which RBI lends short-term money to banks. When RBI raises it, borrowing gets costlier across the economy — loans, EMIs, corporate debt — which is why every RBI policy day moves markets."],
+  ["Circuit Breaker","A price band (e.g. 5%, 10%, 20%) beyond which trading in a stock or index is paused for the day. Meant to stop panic-driven free-falls or spikes from spiraling further in a single session."],
+  ["NAV","Net Asset Value — the per-unit price of a mutual fund, calculated at the end of each trading day from the value of everything the fund holds, minus liabilities."],
+  ["Expense Ratio","The annual fee a mutual fund charges, as a percentage of your investment, to cover management and operating costs. A 1% difference compounds into real money over 10–20 years."],
+  ["Alpha / Beta","Beta measures how much a stock moves with the market (beta 1 = moves in line with it). Alpha is the extra return earned above what beta alone would predict — the part attributable to genuine skill or luck, not just market direction."],
+  ["SIP","Systematic Investment Plan — investing a fixed amount at regular intervals rather than a lump sum. Smooths out the price you pay over time instead of betting on one entry point."],
+  ["Bull / Bear Market","Bull = prices trending up, sentiment optimistic. Bear = prices trending down (commonly defined as a 20%+ fall from a recent high), sentiment cautious or fearful."],
+  ["Blue Chip","Shares of large, financially stable, well-established companies with a long track record — generally seen as lower-risk within equities, not risk-free."],
+  ["Dividend Yield","Annual dividend per share divided by the current share price. Tells you the cash return you're getting from dividends alone, separate from any price appreciation."],
+  ["Attribution Analysis","Breaking down a portfolio's return versus its benchmark into causes — like asset allocation decisions vs. security selection — to see *why* it over- or under-performed, not just by how much."]
+];
+
+/* ============ INDICES (live ticker strip) ============ */
+const INDICES = [
+  { key:"NSEI",    symbol:"^NSEI",    label:"NIFTY 50" },
+  { key:"BSESN",   symbol:"^BSESN",   label:"SENSEX" },
+  { key:"NSEBANK", symbol:"^NSEBANK", label:"BANK NIFTY" },
+];
+const YAHOO_QUOTE_URL = "https://query1.finance.yahoo.com/v7/finance/quote?symbols=" +
+  INDICES.map(i => encodeURIComponent(i.symbol)).join(",");
+
+/* ============ SENTIMENT (lightweight keyword heuristic — not financial advice, just a quick visual cue) ============ */
+const BULLISH_WORDS = ["surge","surges","surged","rally","rallies","rallied","jump","jumps","jumped","soar","soars","soared","gain","gains","gained","record high","all-time high","beats estimates","beat estimates","upgrade","upgraded","outperform","strong","robust","rebound","rebounds","rebounded","climb","climbs","climbed","bullish","buy rating","upbeat","profit rises","profit jumps","surplus","growth","expands","expansion","wins order","wins deal"];
+const BEARISH_WORDS = ["plunge","plunges","plunged","crash","crashes","crashed","slump","slumps","slumped","tumble","tumbles","tumbled","fall","falls","fell","drop","drops","dropped","decline","declines","declined","loss","losses","cut","downgrade","downgraded","underperform","weak","slowdown","misses estimates","miss estimates","bearish","sell rating","sell-off","selloff","selloffs","recession","layoffs","fraud","probe","scam","default","bankruptcy","warns","warning","concern","concerns","fear","fears","volatile","volatility spikes"];
+
+function computeSentiment(text){
+  const t = text.toLowerCase();
+  let score = 0;
+  BULLISH_WORDS.forEach(w => { if(t.includes(w)) score++; });
+  BEARISH_WORDS.forEach(w => { if(t.includes(w)) score--; });
+  if(score > 0) return "bullish";
+  if(score < 0) return "bearish";
+  return "neutral";
+}
+
+/* ============ STATE ============ */
+let allItems = [];
+let activeSource = "all";
+let searchTerm = "";
+let alertKeywords = []; // lowercase, session-only
+let indexData = {}; // key -> { price, changePct }
+let countdown = REFRESH_INTERVAL_MS / 1000;
+let countdownTimer = null;
+// per-source health: { ok: bool, count: number, note: string, checkedAt: Date }
+let sourceStatus = {};
+
+/* ============ CLOCK ============ */
+function tickClock(){
+  const now = new Date();
+  const opts = { timeZone:"Asia/Kolkata", hour:"2-digit", minute:"2-digit", second:"2-digit", hour12:false };
+  const dOpts = { timeZone:"Asia/Kolkata", weekday:"short", day:"2-digit", month:"short", year:"numeric" };
+  document.getElementById("clockTime").textContent = now.toLocaleTimeString("en-IN", opts);
+  document.getElementById("clockDate").textContent = now.toLocaleDateString("en-IN", dOpts).toUpperCase() + " IST";
+}
+setInterval(tickClock, 1000);
+tickClock();
+
+/* ============ CHIPS ============ */
+function renderChips(){
+  const wrap = document.getElementById("sourceChips");
+  wrap.innerHTML = "";
+  const allChip = document.createElement("button");
+  allChip.className = "chip" + (activeSource==="all" ? " active" : "");
+  allChip.innerHTML = `All`;
+  allChip.onclick = () => { activeSource = "all"; renderChips(); renderFeed(); };
+  wrap.appendChild(allChip);
+
+  SOURCES.forEach(src => {
+    const chip = document.createElement("button");
+    chip.className = "chip" + (activeSource===src.key ? " active" : "");
+    chip.style.setProperty("--chip-color", src.color);
+    chip.innerHTML = `<span class="status-dot" id="status-${src.key}"></span> ${src.name}`;
+    chip.onclick = () => { activeSource = src.key; renderChips(); renderFeed(); };
+    wrap.appendChild(chip);
+  });
+}
+
+/* ============ FETCH (two-stage, so one flaky proxy doesn't kill a source) ============ */
+function withTimeout(promise, ms, label){
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
+  return { controller, timer, run: promise(controller.signal) };
+}
+
+// Stage 1: rss2json — fast, pre-parsed JSON, but has a shared free-tier rate limit.
+async function tryRss2json(src){
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), STAGE_TIMEOUT_MS);
+  try{
+    const keyPart = apiKey ? `&api_key=${encodeURIComponent(apiKey)}` : "";
+    const res = await fetch(RSS2JSON + encodeURIComponent(src.rss) + keyPart, { signal: controller.signal });
+    clearTimeout(timer);
+    const data = await res.json().catch(() => null);
+    if(!data) throw new Error("rss2json: non-JSON response");
+    if(data.status !== "ok" || !Array.isArray(data.items) || !data.items.length){
+      throw new Error("rss2json: " + (data.message || "no items returned (likely rate-limited — try adding an API key)"));
+    }
+    return data.items.map(it => ({
+      title: (it.title || "").trim(),
+      desc: stripHtml(it.description || "").slice(0,220),
+      link: it.link,
+      pubDate: it.pubDate ? new Date(it.pubDate) : new Date()
+    }));
+  }catch(err){
+    clearTimeout(timer);
+    if(err.name === "AbortError") throw new Error(`rss2json: timed out after ${STAGE_TIMEOUT_MS/1000}s`);
+    throw err;
+  }
+}
+
+// Stage 2: raw XML via a CORS proxy, parsed by hand — no shared quota, slower.
+async function tryRawXml(src){
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), STAGE_TIMEOUT_MS);
+  try{
+    const res = await fetch(XML_PROXY + encodeURIComponent(src.rss), { signal: controller.signal });
+    clearTimeout(timer);
+    const text = await res.text();
+    const doc = new DOMParser().parseFromString(text, "text/xml");
+    if(doc.querySelector("parsererror")) throw new Error("proxy: unparsable XML");
+    const nodes = Array.from(doc.querySelectorAll("item")).slice(0, 100);
+    if(!nodes.length) throw new Error("proxy: feed returned no <item> entries");
+    return nodes.map(node => ({
+      title: (node.querySelector("title")?.textContent || "").trim(),
+      desc: stripHtml(node.querySelector("description")?.textContent || "").slice(0,220),
+      link: node.querySelector("link")?.textContent || src.rss,
+      pubDate: node.querySelector("pubDate")?.textContent ? new Date(node.querySelector("pubDate").textContent) : new Date()
+    }));
+  }catch(err){
+    clearTimeout(timer);
+    if(err.name === "AbortError") throw new Error(`proxy: timed out after ${STAGE_TIMEOUT_MS/1000}s`);
+    throw err;
+  }
+}
+
+async function fetchSource(src){
+  let items = null, lastError = null;
+  try{
+    items = await tryRss2json(src);
+  }catch(err1){
+    lastError = err1.message;
+    try{
+      items = await tryRawXml(src);
+      lastError = null; // stage 2 recovered
+    }catch(err2){
+      lastError = lastError + " → fallback also failed: " + err2.message;
+    }
+  }
+
+  if(items){
+    sourceStatus[src.key] = { ok:true, count:items.length, note:"live", checkedAt:new Date() };
+    setStatus(src.key, true);
+    return items.map(it => ({ ...it, sourceKey:src.key, sourceName:src.name, color:src.color }));
+  } else {
+    sourceStatus[src.key] = { ok:false, count:0, note:lastError || "unknown error", checkedAt:new Date() };
+    setStatus(src.key, false);
+    return [];
+  }
+}
+
+function stripHtml(html){
+  const tmp = document.createElement("div");
+  tmp.innerHTML = html;
+  return (tmp.textContent || tmp.innerText || "").trim();
+}
+
+/* ============ LIVE INDEX STRIP ============ */
+async function fetchIndices(){
+  try{
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), STAGE_TIMEOUT_MS);
+    const res = await fetch(XML_PROXY + encodeURIComponent(YAHOO_QUOTE_URL), { signal: controller.signal });
+    clearTimeout(timer);
+    const raw = await res.text();
+    const data = JSON.parse(raw);
+    const results = data?.quoteResponse?.result || [];
+    results.forEach(q => {
+      const match = INDICES.find(i => i.symbol === q.symbol);
+      if(match){
+        indexData[match.key] = {
+          price: q.regularMarketPrice,
+          changePct: q.regularMarketChangePercent
+        };
+      }
+    });
+    document.getElementById("indexUpdated").textContent = "as of " + formatDateTime(new Date());
+  }catch(err){
+    document.getElementById("indexUpdated").textContent = "index feed unavailable — will retry next cycle";
+  }
+  renderIndices();
+}
+
+function renderIndices(){
+  INDICES.forEach(idx => {
+    const el = document.getElementById("idx-" + idx.key);
+    if(!el) return;
+    const d = indexData[idx.key];
+    const valEl = el.querySelector(".idx-val");
+    if(!d || typeof d.price !== "number"){
+      valEl.textContent = "···";
+      valEl.className = "idx-val";
+      return;
+    }
+    const dirClass = d.changePct > 0 ? "up" : d.changePct < 0 ? "down" : "";
+    const arrow = d.changePct > 0 ? "▲" : d.changePct < 0 ? "▼" : "•";
+    valEl.className = "idx-val " + dirClass;
+    valEl.textContent = `${d.price.toLocaleString("en-IN",{maximumFractionDigits:2})} ${arrow} ${Math.abs(d.changePct).toFixed(2)}%`;
+  });
+}
+
+function setStatus(key, ok){
+  const dot = document.getElementById("status-"+key);
+  if(dot){
+    dot.classList.remove("ok","err");
+    dot.classList.add(ok?"ok":"err");
+    const s = sourceStatus[key];
+    if(s) dot.title = s.ok ? `${s.count} stories loaded` : `Failed: ${s.note}`;
+  }
+}
+
+async function loadAll(){
+  document.getElementById("refreshBtn").disabled = true;
+  document.getElementById("refreshBtn").textContent = "↻ Fetching…";
+  const [results] = await Promise.all([
+    Promise.all(SOURCES.map(fetchSource)),
+    fetchIndices()
+  ]);
+  allItems = results.flat().sort((a,b) => b.pubDate - a.pubDate);
+  renderFeed();
+  renderTicker();
+  renderDiagnostics();
+  document.getElementById("refreshBtn").disabled = false;
+  document.getElementById("refreshBtn").textContent = "↻ Refresh";
+  resetCountdown();
+}
+
+function renderDiagnostics(){
+  const wrap = document.getElementById("diagnostics");
+  if(!wrap) return;
+  const liveCount = Object.values(sourceStatus).filter(s => s.ok).length;
+  const rows = SOURCES.map(src => {
+    const s = sourceStatus[src.key];
+    if(!s) return `<div>· ${src.name}: <span style="color:var(--muted-2)">not yet checked</span></div>`;
+    const time = s.checkedAt.toLocaleTimeString("en-IN", {hour:"2-digit",minute:"2-digit",second:"2-digit"});
+    return s.ok
+      ? `<div>· ${src.name}: <b style="color:var(--text)">${s.count} stories</b> <span style="color:var(--muted-2)">(${time})</span></div>`
+      : `<div>· ${src.name}: <span style="color:var(--down)">failed</span> — ${escapeHtml(s.note)}</div>`;
+  }).join("");
+  wrap.innerHTML = `<div style="margin-bottom:8px;">${liveCount}/${SOURCES.length} sources live</div>` + rows;
+}
+
+/* ============ RENDER FEED ============ */
+function timeAgo(date){
+  const s = Math.floor((Date.now() - date.getTime())/1000);
+  if(s < 60) return "just now";
+  if(s < 3600) return Math.floor(s/60)+"m ago";
+  if(s < 86400) return Math.floor(s/3600)+"h ago";
+  return Math.floor(s/86400)+"d ago";
+}
+
+function formatDateTime(date){
+  const datePart = date.toLocaleDateString("en-IN", { timeZone:"Asia/Kolkata", day:"2-digit", month:"short", year:"numeric" });
+  const timePart = date.toLocaleTimeString("en-IN", { timeZone:"Asia/Kolkata", hour:"2-digit", minute:"2-digit", hour12:false });
+  return `${datePart}, ${timePart} IST`;
+}
+
+function renderFeed(){
+  const feed = document.getElementById("feed");
+  let items = allItems;
+  if(activeSource !== "all") items = items.filter(i => i.sourceKey === activeSource);
+  if(searchTerm.trim()){
+    const t = searchTerm.toLowerCase();
+    items = items.filter(i => i.title.toLowerCase().includes(t) || i.desc.toLowerCase().includes(t));
+  }
+  document.getElementById("feedCount").textContent = items.length ? `${items.length} stories` : "";
+
+  if(!items.length){
+    if(allItems.length === 0){
+      // Nothing loaded at all — this is a fetch/connectivity problem, not a search problem.
+      const failed = Object.values(sourceStatus).filter(s => s && !s.ok).length;
+      feed.innerHTML = `<div class="empty-state">
+        The wire hasn't loaded any stories yet${failed ? ` — ${failed}/${SOURCES.length} sources failed to respond` : ""}.<br><br>
+        This isn't a search issue — no headlines have come in at all. Check the <b>Wire Diagnostics</b> panel on the right for the exact reason per source, then hit <b>↻ Refresh</b>.
+      </div>`;
+    } else if(activeSource !== "all"){
+      const srcName = SOURCES.find(s => s.key===activeSource)?.name || activeSource;
+      feed.innerHTML = `<div class="empty-state">No match for "${escapeHtml(searchTerm)}" within <b>${srcName}</b> specifically.<br>Try "All" sources, or a broader term.</div>`;
+    } else {
+      feed.innerHTML = `<div class="empty-state">No headlines currently on the wire mention "${escapeHtml(searchTerm)}".<br>The feed only holds the last ~100 stories per source — try again after the next refresh, or broaden the term.</div>`;
+    }
+    return;
+  }
+
+  if(alertKeywords.length){
+    items = [...items].sort((a,b) => {
+      const aHit = isAlertHit(a) ? 1 : 0;
+      const bHit = isAlertHit(b) ? 1 : 0;
+      if(aHit !== bHit) return bHit - aHit; // hits first
+      return b.pubDate - a.pubDate;
+    });
+  }
+
+  feed.innerHTML = items.slice(0,500).map(i => {
+    const hit = isAlertHit(i);
+    const sentiment = computeSentiment(i.title + " " + i.desc);
+    return `
+    <a class="card${hit ? " alert-hit" : ""}" href="${i.link}" target="_blank" rel="noopener" style="--card-color:${i.color}">
+      <div class="card-meta">
+        <span>${i.sourceName}</span>
+        <span class="time">· ${timeAgo(i.pubDate)}</span>
+        <span class="timestamp">· ${formatDateTime(i.pubDate)}</span>
+        <span class="sentiment-badge ${sentiment}">${sentiment}</span>
+        ${hit ? `<span class="alert-badge">★ alert</span>` : ""}
+      </div>
+      <div class="card-title">${escapeHtml(i.title)}</div>
+      <div class="card-desc">${escapeHtml(i.desc)}</div>
+    </a>
+  `;
+  }).join("");
+}
+
+function isAlertHit(item){
+  if(!alertKeywords.length) return false;
+  const t = (item.title + " " + item.desc).toLowerCase();
+  return alertKeywords.some(k => t.includes(k));
+}
+
+function escapeHtml(str){
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+/* ============ TICKER ============ */
+function renderTicker(){
+  const top = allItems.slice(0, 36);
+  const track = document.getElementById("tickerTrack");
+  if(!top.length){
+    track.innerHTML = `<span class="ticker-item"><span class="dot">●</span> Wire quiet — waiting on sources.</span>`;
+    return;
+  }
+  const build = () => top.map(i => `<span class="ticker-item"><span class="dot">●</span> ${escapeHtml(i.title)} <span class="src-tag">— ${i.sourceName}</span></span>`).join("");
+  track.innerHTML = build() + build(); // duplicate for seamless loop
+}
+
+/* ============ COUNTDOWN / AUTO-REFRESH ============ */
+function resetCountdown(){
+  countdown = REFRESH_INTERVAL_MS / 1000;
+}
+function tickCountdown(){
+  countdown -= 1;
+  if(countdown <= 0){ loadAll(); return; }
+  const m = Math.floor(countdown/60);
+  const s = String(countdown%60).padStart(2,"0");
+  document.getElementById("autoNote").textContent = `next auto-refresh in ${m}:${s}`;
+}
+countdownTimer = setInterval(tickCountdown, 1000);
+
+/* ============ GLOSSARY ============ */
+function renderGlossary(){
+  const wrap = document.getElementById("glossary");
+  wrap.innerHTML = GLOSSARY.map(([term, def]) => `
+    <details class="term">
+      <summary>${term}</summary>
+      <p>${def}</p>
+    </details>
+  `).join("");
+}
+
+/* ============ EVENTS ============ */
+function debounce(fn, ms){
+  let t;
+  return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+}
+document.getElementById("refreshBtn").addEventListener("click", loadAll);
+document.getElementById("searchInput").addEventListener("input", debounce((e) => {
+  searchTerm = e.target.value;
+  renderFeed();
+}, 180));
+document.getElementById("alertInput").addEventListener("input", debounce((e) => {
+  alertKeywords = e.target.value.split(",").map(k => k.trim().toLowerCase()).filter(Boolean);
+  const statusEl = document.getElementById("alertStatus");
+  statusEl.textContent = alertKeywords.length
+    ? `watching for: ${alertKeywords.join(", ")}`
+    : "no alerts set";
+  renderFeed();
+}, 250));
+document.getElementById("apiKeyInput").value = RSS2JSON_API_KEY;
+updateKeyStatus();
+
+function isPlausibleKey(k){
+  // rss2json keys are a short alphanumeric token — never a URL, never containing "/" or whitespace.
+  return k.length > 0 && !/[\s\/:]/.test(k) && !/^https?/i.test(k);
+}
+function updateKeyStatus(msg, isError){
+  const el = document.getElementById("keyStatus");
+  if(msg){ el.textContent = msg; el.style.color = isError ? "var(--down)" : "var(--muted-2)"; return; }
+  el.style.color = "var(--muted-2)";
+  el.textContent = apiKey ? "custom rss2json key applied" : "no key applied — running on rss2json's free tier";
+}
+document.getElementById("applyKeyBtn").addEventListener("click", () => {
+  const raw = document.getElementById("apiKeyInput").value.trim();
+  if(!raw){ apiKey = ""; updateKeyStatus(); loadAll(); return; }
+  if(!isPlausibleKey(raw)){
+    updateKeyStatus("that doesn't look like a valid key (it looks like a URL or has spaces) — not applied", true);
+    return;
+  }
+  apiKey = raw;
+  updateKeyStatus();
+  loadAll();
+});
+document.getElementById("clearKeyBtn").addEventListener("click", () => {
+  apiKey = "";
+  document.getElementById("apiKeyInput").value = "";
+  updateKeyStatus();
+  loadAll();
+});
+
+/* ============ INIT ============ */
+renderChips();
+renderGlossary();
+renderDiagnostics();
+loadAll();
+</script>
+</body>
+</html>
